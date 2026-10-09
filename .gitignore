@@ -1,0 +1,12 @@
+# Build artifacts
+build/
+*.bin
+*.elf
+*.hex
+*.o
+*.d
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini

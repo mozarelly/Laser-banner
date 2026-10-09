@@ -25,7 +25,7 @@ void drawCalibrationSquare(const uint8_t *coordsX, const uint8_t *coordsY, const
         }
 
         dacWrite(DAC_X, x);
-        dacWrite(DAC_Y, 255 - y); // 255 - y ensures Y+ moves physically UP on wall
+        dacWrite(DAC_Y, y); // Maps Y+ directly to moving UP on the wall
 
         // Dwell longer on selected vertex so it glows brighter on the wall
         if (i == selected_vertex || (i == 4 && selected_vertex == 0)) {

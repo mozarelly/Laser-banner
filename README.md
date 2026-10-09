@@ -14,18 +14,22 @@ Features a standalone Wi-Fi hotspot and real-time WebSocket web dashboard, offer
   - **Shape Mode**: Draws graphics and vector shapes.
   - **Calibration Mode**: Projects the 4-corner calibration square for projector alignment.
 - **Interactive Keystone Calibration**:
-  - Select corner: **1: Bottom-Left**, **2: Bottom-Right**, **3: Top-Right**, **4: Top-Left**.
+  - Select corner:
+    - **1: Bottom-Right**
+    - **2: Bottom-Left**
+    - **3: Top-Left**
+    - **4: Top-Right**
   - **Touch D-Pad**: Tap **▲**, **▼**, **◀**, **▶** to nudge corners directly from your smartphone.
   - **Step Size Selector**: Choose between **1**, **2**, **5**, or **10** units per tap.
-  - **Live Coordinate Readout**: Displays the real-time `(X, Y)` values for all 4 corners.
+  - **Live Coordinate Readout**: Displays real-time `(X, Y)` values for all 4 corners.
   - **Visual Corner Highlight**: The currently selected corner dwells longer and glows brighter on the physical wall.
 - **Real-Time Sliders**: Adjust brightness (5 kHz PWM, 0–255) and point scan delay/speed.
 - **Color Selection**: 7 clean colors (Red, Green, Blue, Yellow, Magenta, Cyan, White).
 
 ### 2. Dual Control: Laptop Keyboard + Phone Web App
 You can calibrate using the phone web UI OR using your laptop keyboard in the Serial Monitor:
-- `1`, `2`, `3`, `4`: Select corners
-- `W`, `A`, `S`, `D`: Nudge active corner Up, Down, Left, Right
+- `1`, `2`, `3`, `4`: Select corners (1:BR, 2:BL, 3:TL, 4:TR)
+- `W`, `A`, `S`, `D`: Nudge active corner Up, Left, Down, Right
 - `P`: Print current coordinates to console
 - `Q` / `E`: Scan speed slower / faster
 - `C`: Cycle color

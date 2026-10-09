@@ -23,25 +23,25 @@ void read_serial_key() {
         if (cmd == '1') {
             selected_vertex = 0;
             current_mode = 1; // switch to calibration mode
-            Serial.println("Selected: Vertex 1 [Bottom-Left] -> (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
+            Serial.println("Selected: Vertex 1 [Bottom-Right] -> (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '2') {
             selected_vertex = 1;
             current_mode = 1;
-            Serial.println("Selected: Vertex 2 [Bottom-Right] -> (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
+            Serial.println("Selected: Vertex 2 [Bottom-Left] -> (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '3') {
             selected_vertex = 2;
             current_mode = 1;
-            Serial.println("Selected: Vertex 3 [Top-Right] -> (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
+            Serial.println("Selected: Vertex 3 [Top-Left] -> (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '4') {
             selected_vertex = 3;
             current_mode = 1;
-            Serial.println("Selected: Vertex 4 [Top-Left] -> (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
+            Serial.println("Selected: Vertex 4 [Top-Right] -> (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
             broadcastCalibration();
         }
 
@@ -55,21 +55,21 @@ void read_serial_key() {
             Serial.println("V" + String(selected_vertex + 1) + " DOWN -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
         }
         else if (cmd == 'a' || cmd == 'A') {
-            nudgeVertex(-move_step, 0);
+            nudgeVertex(move_step, 0); // On this projector, increasing X moves physically LEFT on wall
             Serial.println("V" + String(selected_vertex + 1) + " LEFT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
         }
         else if (cmd == 'd' || cmd == 'D') {
-            nudgeVertex(move_step, 0);
+            nudgeVertex(-move_step, 0); // Decreasing X moves physically RIGHT on wall
             Serial.println("V" + String(selected_vertex + 1) + " RIGHT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
         }
 
         // Print Coordinates: P
         else if (cmd == 'p' || cmd == 'P') {
             Serial.println("\n--- Current Vertex Coordinates ---");
-            Serial.println("V1 (Bottom-Left) : (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
-            Serial.println("V2 (Bottom-Right): (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
-            Serial.println("V3 (Top-Right)   : (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
-            Serial.println("V4 (Top-Left)    : (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
+            Serial.println("V1 (Bottom-Right): (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
+            Serial.println("V2 (Bottom-Left) : (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
+            Serial.println("V3 (Top-Left)    : (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
+            Serial.println("V4 (Top-Right)   : (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
             Serial.println("----------------------------------\n");
         }
 

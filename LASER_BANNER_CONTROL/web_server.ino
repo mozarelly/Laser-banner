@@ -153,18 +153,18 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   <h2>Keystone Corner Calibration</h2>
   
   <div class="v-grid">
-    <button class="vbtn act" id="vb0" onclick="setVertex(0)">1: Bottom-Left</button>
-    <button class="vbtn" id="vb1" onclick="setVertex(1)">2: Bottom-Right</button>
-    <button class="vbtn" id="vb2" onclick="setVertex(2)">3: Top-Right</button>
-    <button class="vbtn" id="vb3" onclick="setVertex(3)">4: Top-Left</button>
+    <button class="vbtn act" id="vb0" onclick="setVertex(0)">1: Bottom-Right</button>
+    <button class="vbtn" id="vb1" onclick="setVertex(1)">2: Bottom-Left</button>
+    <button class="vbtn" id="vb2" onclick="setVertex(2)">3: Top-Left</button>
+    <button class="vbtn" id="vb3" onclick="setVertex(3)">4: Top-Right</button>
   </div>
 
   <!-- Touch D-Pad -->
   <div class="dpad">
     <button class="dbtn dbtn-up" onclick="nudge(0, moveStep)">&#9650;</button>
-    <button class="dbtn dbtn-left" onclick="nudge(-moveStep, 0)">&#9664;</button>
+    <button class="dbtn dbtn-left" onclick="nudge(moveStep, 0)">&#9664;</button>
     <button class="dbtn dbtn-down" onclick="nudge(0, -moveStep)">&#9660;</button>
-    <button class="dbtn dbtn-right" onclick="nudge(moveStep, 0)">&#9654;</button>
+    <button class="dbtn dbtn-right" onclick="nudge(-moveStep, 0)">&#9654;</button>
   </div>
 
   <!-- Step size -->
@@ -178,10 +178,10 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
   <!-- Live coordinates display -->
   <div class="coords-box" id="coordsDisplay">
-    V1 (BL): X=30, Y=30<br>
-    V2 (BR): X=225, Y=30<br>
-    V3 (TR): X=225, Y=225<br>
-    V4 (TL): X=30, Y=225
+    V1 (BR): X=30, Y=30<br>
+    V2 (BL): X=225, Y=30<br>
+    V3 (TL): X=225, Y=225<br>
+    V4 (TR): X=30, Y=225
   </div>
 
   <button class="reset-btn" onclick="resetCalib()">Reset Default Corners</button>
@@ -235,10 +235,10 @@ function connect() {
     if (p[0]=='V') { setVertexUI(p[1]); }
     if (p[0]=='CAL') {
       byId('coordsDisplay').innerHTML = 
-        'V1 (BL): X=' + p[1] + ', Y=' + p[2] + '<br>' +
-        'V2 (BR): X=' + p[3] + ', Y=' + p[4] + '<br>' +
-        'V3 (TR): X=' + p[5] + ', Y=' + p[6] + '<br>' +
-        'V4 (TL): X=' + p[7] + ', Y=' + p[8];
+        'V1 (BR): X=' + p[1] + ', Y=' + p[2] + '<br>' +
+        'V2 (BL): X=' + p[3] + ', Y=' + p[4] + '<br>' +
+        'V3 (TL): X=' + p[5] + ', Y=' + p[6] + '<br>' +
+        'V4 (TR): X=' + p[7] + ', Y=' + p[8];
     }
   };
 }

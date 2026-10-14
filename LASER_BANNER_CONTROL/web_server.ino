@@ -15,6 +15,7 @@ extern uint8_t Calib_CoordsY[];
 void print_color(int pointer);
 void nudgeVertex(int dx, int dy);
 void broadcastCalibration();
+void saveCalibrationToNVS();
 
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
@@ -120,9 +121,19 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     line-height: 1.6; color: #64ffda;
   }
   .reset-btn {
-    width: 100%; margin-top: 10px; padding: 10px; background: #281224;
+    width: 100%; margin-top: 8px; padding: 10px; background: #281224;
     border: 1px solid #6b143c; border-radius: 8px; color: #ff6b91;
     font-size: 13px; font-weight: bold; cursor: pointer;
+  }
+  .save-btn {
+    width: 100%; margin-top: 10px; padding: 13px; background: #007a3d;
+    border: 2px solid #00e676; border-radius: 8px; color: #fff;
+    font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 0 10px rgba(0,230,118,0.25);
+  }
+  .save-btn:active { background: #00a854; transform: scale(0.98); }
+  .save-toast {
+    margin-top: 6px; text-align: center; color: #00e676; font-size: 13px; font-weight: bold;
   }
 </style>
 </head>
@@ -184,6 +195,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     V4 (TR): X=30, Y=225
   </div>
 
+  <button class="save-btn" id="btnSave" onclick="saveCalib()">💾 Save Calibration to Flash</button>
+  <div id="saveToast" class="save-toast" style="display:none;">✓ Calibration saved to Flash!</div>
   <button class="reset-btn" onclick="resetCalib()">Reset Default Corners</button>
 </div>
 
@@ -240,6 +253,11 @@ function connect() {
         'V3 (TL): X=' + p[5] + ', Y=' + p[6] + '<br>' +
         'V4 (TR): X=' + p[7] + ', Y=' + p[8];
     }
+    if (p[0]=='SAVED') {
+      var t = byId('saveToast');
+      t.style.display = 'block';
+      setTimeout(function() { t.style.display = 'none'; }, 2500);
+    }
   };
 }
 
@@ -273,6 +291,8 @@ function setStep(s, btn) {
 }
 
 function resetCalib() { send('R:1'); }
+
+function saveCalib() { send('SAVE:1'); }
 
 function setCUI(n) {
   document.querySelectorAll('.cbtn').forEach(function(b) { 
@@ -391,6 +411,10 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                 Calib_CoordsX[4] = 30;  Calib_CoordsY[4] = 30;
                 broadcastCalibration();
                 Serial.println("Calibration corners reset to default");
+            }
+            else if (cmd == "SAVE") {
+                saveCalibrationToNVS();
+                ws.broadcastTXT("SAVED:OK");
             }
             break;
         }

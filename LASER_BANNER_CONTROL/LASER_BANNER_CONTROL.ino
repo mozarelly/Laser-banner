@@ -7,6 +7,12 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>  // Install: "WebSockets" by Markus Sattler
+#include <Preferences.h>
+
+// --- Preferences for NVS Flash Persistence ---
+Preferences prefs;
+void loadCalibrationFromNVS();
+void saveCalibrationToNVS();
 
 // --- Forward Declarations ---
 void setupWeb();
@@ -53,9 +59,46 @@ extern const uint8_t PROGMEM Shape_CoordsX[];
 extern const uint8_t PROGMEM Shape_CoordsY[];
 extern const uint8_t PROGMEM Shape_Colors[];
 
+void loadCalibrationFromNVS() {
+    prefs.begin("laser_cal", true); // Read-only mode
+    if (prefs.isKey("c0x")) {
+        Calib_CoordsX[0] = prefs.getUChar("c0x", 30);
+        Calib_CoordsY[0] = prefs.getUChar("c0y", 30);
+        Calib_CoordsX[1] = prefs.getUChar("c1x", 225);
+        Calib_CoordsY[1] = prefs.getUChar("c1y", 30);
+        Calib_CoordsX[2] = prefs.getUChar("c2x", 225);
+        Calib_CoordsY[2] = prefs.getUChar("c2y", 225);
+        Calib_CoordsX[3] = prefs.getUChar("c3x", 30);
+        Calib_CoordsY[3] = prefs.getUChar("c3y", 225);
+        Calib_CoordsX[4] = Calib_CoordsX[0];
+        Calib_CoordsY[4] = Calib_CoordsY[0];
+        Serial.println("Loaded 4-corner calibration from Flash (NVS)!");
+    } else {
+        Serial.println("No saved calibration found in Flash. Using default corners.");
+    }
+    prefs.end();
+}
+
+void saveCalibrationToNVS() {
+    prefs.begin("laser_cal", false); // Read-write mode
+    prefs.putUChar("c0x", Calib_CoordsX[0]);
+    prefs.putUChar("c0y", Calib_CoordsY[0]);
+    prefs.putUChar("c1x", Calib_CoordsX[1]);
+    prefs.putUChar("c1y", Calib_CoordsY[1]);
+    prefs.putUChar("c2x", Calib_CoordsX[2]);
+    prefs.putUChar("c2y", Calib_CoordsY[2]);
+    prefs.putUChar("c3x", Calib_CoordsX[3]);
+    prefs.putUChar("c3y", Calib_CoordsY[3]);
+    prefs.end();
+    Serial.println(">>> Calibration permanently saved to Flash memory (NVS)! <<<");
+}
+
 void setup() {
     Serial.begin(115200);
     Serial.println("\n=== Laser Banner & Calibration Control ===");
+
+    // Load saved calibration from flash immediately on boot
+    loadCalibrationFromNVS();
 
     // --- Configure PWM on laser pins ---
     ledcAttach(red_pin,   5000, 8);

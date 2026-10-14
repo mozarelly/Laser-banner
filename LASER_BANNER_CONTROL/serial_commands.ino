@@ -14,6 +14,7 @@ extern int current_mode;
 void nudgeVertex(int dx, int dy);
 void broadcastCalibration();
 void print_color(int pointer);
+extern void saveCalibrationToNVS();
 
 void read_serial_key() {
     while (Serial.available() > 0) {
@@ -71,6 +72,12 @@ void read_serial_key() {
             Serial.println("V3 (Top-Left)    : (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
             Serial.println("V4 (Top-Right)   : (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
             Serial.println("----------------------------------\n");
+        }
+
+        // Save Calibration: K
+        else if (cmd == 'k' || cmd == 'K') {
+            saveCalibrationToNVS();
+            Serial.println("Saved calibration to Flash (NVS)!");
         }
 
         // Color: C

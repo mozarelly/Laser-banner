@@ -19,9 +19,9 @@ void read_serial_key();
 // Corner 1 = V2 = Bottom-Left
 // Corner 2 = V3 = Top-Left
 // Corner 3 = V4 = Top-Right
-void warpPoint(uint8_t rawX, uint8_t rawY, uint8_t *outX, uint8_t *outY) {
     float u = (float)rawX / 255.0f;
-    float v = (float)rawY / 255.0f;
+    // Invert V: rawY=0 (top of image) maps to Top of wall, rawY=255 maps to Bottom
+    float v = (float)(255 - rawY) / 255.0f;
 
     // Bottom edge interpolation (from BL to BR)
     float bX = (1.0f - u) * Calib_CoordsX[1] + u * Calib_CoordsX[0];

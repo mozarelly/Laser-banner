@@ -164,10 +164,10 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   <h2>Keystone Corner Calibration</h2>
   
   <div class="v-grid">
-    <button class="vbtn act" id="vb0" onclick="setVertex(0)">1: Bottom-Right</button>
-    <button class="vbtn" id="vb1" onclick="setVertex(1)">2: Bottom-Left</button>
-    <button class="vbtn" id="vb2" onclick="setVertex(2)">3: Top-Left</button>
-    <button class="vbtn" id="vb3" onclick="setVertex(3)">4: Top-Right</button>
+    <button class="vbtn act" id="vb0" onclick="setVertex(0)">1: Abajo-Derecha</button>
+    <button class="vbtn" id="vb1" onclick="setVertex(1)">2: Abajo-Izquierda</button>
+    <button class="vbtn" id="vb2" onclick="setVertex(2)">3: Arriba-Izquierda</button>
+    <button class="vbtn" id="vb3" onclick="setVertex(3)">4: Arriba-Derecha</button>
   </div>
 
   <!-- Touch D-Pad -->
@@ -195,9 +195,9 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     V4 (TR): X=30, Y=225
   </div>
 
-  <button class="save-btn" id="btnSave" onclick="saveCalib()">💾 Save Calibration to Flash</button>
-  <div id="saveToast" class="save-toast" style="display:none;">✓ Calibration saved to Flash!</div>
-  <button class="reset-btn" onclick="resetCalib()">Reset Default Corners</button>
+  <button class="save-btn" id="btnSave" onclick="saveCalib()"> Guardar calibracion</button>
+  <div id="saveToast" class="save-toast" style="display:none;"> Calibracion guardada en memoria flash </div>
+  <button class="reset-btn" onclick="resetCalib()"> Regresar a calibracion original</button>
 </div>
 
 <!-- Brightness Slider -->
@@ -220,13 +220,13 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <div class="panel">
   <h2>Laser Color</h2>
   <div class="colors">
-    <button class="cbtn act" data-c="1" style="background:#e00" onclick="setC(1)" title="Red"></button>
-    <button class="cbtn" data-c="2" style="background:#0b0" onclick="setC(2)" title="Green"></button>
-    <button class="cbtn" data-c="3" style="background:#22f" onclick="setC(3)" title="Blue"></button>
-    <button class="cbtn" data-c="4" style="background:#dd0" onclick="setC(4)" title="Yellow"></button>
+    <button class="cbtn act" data-c="1" style="background:#e00" onclick="setC(1)" title="Rojo"></button>
+    <button class="cbtn" data-c="2" style="background:#0b0" onclick="setC(2)" title="Verde"></button>
+    <button class="cbtn" data-c="3" style="background:#22f" onclick="setC(3)" title="Azul"></button>
+    <button class="cbtn" data-c="4" style="background:#dd0" onclick="setC(4)" title="Amarillo"></button>
     <button class="cbtn" data-c="5" style="background:#d0d" onclick="setC(5)" title="Magenta"></button>
     <button class="cbtn" data-c="6" style="background:#0cc" onclick="setC(6)" title="Cyan"></button>
-    <button class="cbtn" data-c="7" style="background:#ddd" onclick="setC(7)" title="White"></button>
+    <button class="cbtn" data-c="7" style="background:#ddd" onclick="setC(7)" title="Blanco"></button>
   </div>
 </div>
 
@@ -410,7 +410,7 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                 Calib_CoordsX[3] = 30;  Calib_CoordsY[3] = 225;
                 Calib_CoordsX[4] = 30;  Calib_CoordsY[4] = 30;
                 broadcastCalibration();
-                Serial.println("Calibration corners reset to default");
+                Serial.println("Esquinas de regreso a calibracion inicial");
             }
             else if (cmd == "SAVE") {
                 saveCalibrationToNVS();

@@ -2,6 +2,13 @@
 //  Web Server + WebSocket + HTML UI with Live Calibration
 // ============================================
 
+#include <Arduino.h>
+#include <WebServer.h>
+#include <WebSocketsServer.h>
+
+extern WebServer server;
+extern WebSocketsServer ws;
+
 extern int brightness;
 extern int brake;
 extern int color_pointer;
@@ -19,30 +26,31 @@ void saveCalibrationToNVS();
 
 const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Laser Banner Control</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-    background: #121224; color: #eee; 
+    background: #101221; color: #eee; 
     padding: 12px; max-width: 440px; margin: 0 auto;
   }
   h1 { text-align: center; color: #ff3b69; margin: 8px 0 16px; font-size: 21px; }
   .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; 
          background: #555; margin-left: 8px; vertical-align: middle; }
   .dot.on { background: #00e676; box-shadow: 0 0 8px #00e676; }
-  .panel { background: #1a1a38; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #282852; }
-  .panel h2 { font-size: 12px; color: #8e8eb2; margin-bottom: 10px; 
+  .panel { background: #191b36; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #292d54; }
+  .panel h2 { font-size: 12px; color: #8e95bf; margin-bottom: 10px; 
               text-transform: uppercase; letter-spacing: 1px; }
   
   /* Mode Toggle */
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .mbtn {
-    padding: 12px; border: 2px solid #333366; border-radius: 8px;
-    background: #0f1535; color: #aaa; font-size: 14px; font-weight: bold;
+    padding: 12px; border: 2px solid #333866; border-radius: 8px;
+    background: #0f1228; color: #aaa; font-size: 14px; font-weight: bold;
     cursor: pointer; text-align: center; transition: all 0.15s;
   }
   .mbtn.act { border-color: #ff3b69; color: #fff; background: #38122c; }
@@ -50,8 +58,8 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   /* Power Buttons */
   .power-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .pbtn {
-    padding: 14px; border: 2px solid #333366; border-radius: 8px;
-    background: #0f1535; color: #aaa; font-size: 15px; font-weight: bold;
+    padding: 14px; border: 2px solid #333866; border-radius: 8px;
+    background: #0f1228; color: #aaa; font-size: 15px; font-weight: bold;
     cursor: pointer; text-align: center; transition: all 0.15s;
   }
   .pbtn.on-act { border-color: #00e676; color: #fff; background: #005a2b; box-shadow: 0 0 10px rgba(0,230,118,0.3); }
@@ -60,7 +68,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   /* Sliders */
   input[type=range] { 
     -webkit-appearance: none; width: 100%; height: 8px; 
-    border-radius: 4px; background: #0f1535; outline: none; 
+    border-radius: 4px; background: #0f1228; outline: none; 
   }
   input[type=range]::-webkit-slider-thumb { 
     -webkit-appearance: none; width: 28px; height: 28px; 
@@ -71,34 +79,130 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   /* Colors */
   .colors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .cbtn { 
-    height: 46px; border: 3px solid #333366; border-radius: 8px; 
+    height: 46px; border: 3px solid #333866; border-radius: 8px; 
     cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; 
   }
   .cbtn.act { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.5); }
 
-  /* Calibration Corners */
-  .v-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .vbtn {
-    padding: 10px 6px; border: 2px solid #333366; border-radius: 8px;
-    background: #0f1535; color: #aaa; font-size: 13px; font-weight: bold;
-    cursor: pointer; text-align: center; transition: all 0.15s;
+  /* ========================================================
+     CUADRO VISUAL DE CALIBRACION CON ESQUINAS 1, 2, 3, 4
+     ======================================================== */
+  .calib-box-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    height: 200px;
+    margin: 8px auto 14px;
+    background: #0d0f22;
+    border: 2px dashed #3a3f6e;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
   }
-  .vbtn.act { border-color: #00e676; color: #fff; background: #0f3d26; box-shadow: 0 0 10px rgba(0,230,118,0.3); }
+  .calib-inner-border {
+    position: absolute;
+    top: 26px; bottom: 26px; left: 26px; right: 26px;
+    border: 2px solid #2d3460;
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  .corner-node {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #161a35;
+    border: 3px solid #4a548c;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 2;
+  }
+  .corner-node .corner-lbl {
+    font-size: 8px;
+    font-weight: 700;
+    color: #8c9ac4;
+    margin-top: 1px;
+    letter-spacing: 0.5px;
+  }
+  .corner-node.act {
+    border-color: #00e676;
+    background: #005a2b;
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0, 230, 118, 0.7);
+    transform: scale(1.12);
+  }
+  .corner-node.act .corner-lbl {
+    color: #9effc7;
+  }
+
+  /* Posiciones de las 4 esquinas */
+  .c-tl { top: 4px; left: 4px; }       /* Esquina 3: Arriba-Izquierda */
+  .c-tr { top: 4px; right: 4px; }      /* Esquina 4: Arriba-Derecha */
+  .c-bl { bottom: 4px; left: 4px; }    /* Esquina 2: Abajo-Izquierda */
+  .c-br { bottom: 4px; right: 4px; }   /* Esquina 1: Abajo-Derecha */
+
+  /* Botón central: Mover todo el cuadro completo */
+  .center-node {
+    padding: 10px 16px;
+    background: #161a35;
+    border: 2px solid #4a548c;
+    border-radius: 10px;
+    color: #a4b3d6;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .center-node.act {
+    border-color: #00d2ff;
+    background: #004566;
+    color: #fff;
+    box-shadow: 0 0 14px rgba(0, 210, 255, 0.6);
+    transform: scale(1.08);
+  }
+
+  /* Indicador del elemento en ajuste */
+  .target-indicator {
+    text-align: center;
+    font-size: 13px;
+    color: #b2bfe6;
+    background: #111429;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #232747;
+  }
+  .target-indicator strong { color: #00e676; }
 
   /* D-Pad Directional Controls */
   .dpad {
     display: grid;
-    grid-template-columns: 70px 70px 70px;
+    grid-template-columns: 75px 75px 75px;
     grid-template-rows: 55px 55px;
     gap: 8px;
     justify-content: center;
-    margin: 12px auto;
+    margin: 8px auto 14px;
   }
   .dbtn {
-    background: #252554; border: 2px solid #3d3d7a; border-radius: 10px;
+    background: #252854; border: 2px solid #3d437a; border-radius: 10px;
     color: #fff; font-size: 20px; font-weight: bold; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     user-select: none; -webkit-tap-highlight-color: transparent;
+    transition: 0.1s;
   }
   .dbtn:active { background: #ff3b69; border-color: #fff; transform: scale(0.95); }
   .dbtn-up { grid-column: 2; grid-row: 1; }
@@ -107,21 +211,26 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   .dbtn-right { grid-column: 3; grid-row: 2; }
 
   /* Step size selector */
-  .step-row { display: flex; justify-content: space-around; align-items: center; margin-top: 10px; }
+  .step-row { display: flex; justify-content: space-around; align-items: center; margin-bottom: 12px; }
   .step-btn {
-    padding: 6px 14px; background: #0f1535; border: 1px solid #333366;
+    padding: 6px 14px; background: #0f1228; border: 1px solid #333866;
     border-radius: 6px; color: #aaa; font-size: 13px; font-weight: bold; cursor: pointer;
   }
   .step-btn.act { background: #ff3b69; color: #fff; border-color: #fff; }
 
   /* Coordinate Readouts */
   .coords-box {
-    background: #0d0d1a; border: 1px solid #282852; border-radius: 8px;
-    padding: 10px; margin-top: 12px; font-family: monospace; font-size: 13px;
-    line-height: 1.6; color: #64ffda;
+    background: #0d0f1e; border: 1px solid #282d52; border-radius: 8px;
+    padding: 10px 12px; margin-top: 8px; font-family: monospace; font-size: 13px;
+    line-height: 1.7; color: #889ac2;
   }
+  .c-row.act {
+    color: #00e676;
+    font-weight: bold;
+  }
+
   .reset-btn {
-    width: 100%; margin-top: 8px; padding: 10px; background: #281224;
+    width: 100%; margin-top: 8px; padding: 11px; background: #281224;
     border: 1px solid #6b143c; border-radius: 8px; color: #ff6b91;
     font-size: 13px; font-weight: bold; cursor: pointer;
   }
@@ -161,16 +270,48 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
 <!-- Interactive Calibration Panel -->
 <div class="panel" id="calibPanel">
-  <h2>Keystone Corner Calibration</h2>
+  <h2>Calibración de Cuadro y Esquinas</h2>
   
-  <div class="v-grid">
-    <button class="vbtn act" id="vb0" onclick="setVertex(0)">1: Abajo-Derecha</button>
-    <button class="vbtn" id="vb1" onclick="setVertex(1)">2: Abajo-Izquierda</button>
-    <button class="vbtn" id="vb2" onclick="setVertex(2)">3: Arriba-Izquierda</button>
-    <button class="vbtn" id="vb3" onclick="setVertex(3)">4: Arriba-Derecha</button>
+  <!-- Cuadro Visual con esquinas 1, 2, 3, 4 -->
+  <div class="calib-box-wrap">
+    <div class="calib-inner-border"></div>
+
+    <!-- Esquina 3: Arriba-Izquierda (TL) -->
+    <button class="corner-node c-tl" id="vb2" onclick="setVertex(2)" title="Esquina 3">
+      3
+      <span class="corner-lbl">TL</span>
+    </button>
+
+    <!-- Esquina 4: Arriba-Derecha (TR) -->
+    <button class="corner-node c-tr" id="vb3" onclick="setVertex(3)" title="Esquina 4">
+      4
+      <span class="corner-lbl">TR</span>
+    </button>
+
+    <!-- Centro: Mover el Cuadro Completo -->
+    <button class="center-node" id="vb4" onclick="setVertex(4)" title="Mover todo el cuadro">
+      &#10021; MOVER TODO
+    </button>
+
+    <!-- Esquina 2: Abajo-Izquierda (BL) -->
+    <button class="corner-node c-bl" id="vb1" onclick="setVertex(1)" title="Esquina 2">
+      2
+      <span class="corner-lbl">BL</span>
+    </button>
+
+    <!-- Esquina 1: Abajo-Derecha (BR) -->
+    <button class="corner-node c-br act" id="vb0" onclick="setVertex(0)" title="Esquina 1">
+      1
+      <span class="corner-lbl">BR</span>
+    </button>
   </div>
 
-  <!-- Touch D-Pad -->
+  <!-- Indicador de elemento seleccionado -->
+  <div class="target-indicator" id="targetIndicator">
+    Ajustando: <strong>Esquina 1 (Abajo-Derecha)</strong>
+  </div>
+
+  <!-- Controles Direccionales D-Pad -->
   <div class="dpad">
     <button class="dbtn dbtn-up" onclick="nudge(0, moveStep)">&#9650;</button>
     <button class="dbtn dbtn-left" onclick="nudge(moveStep, 0)">&#9664;</button>
@@ -178,26 +319,27 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <button class="dbtn dbtn-right" onclick="nudge(-moveStep, 0)">&#9654;</button>
   </div>
 
-  <!-- Step size -->
+  <!-- Tamaño de Paso -->
   <div class="step-row">
-    <span style="font-size: 12px; color: #8e8eb2;">Step Size:</span>
+    <span style="font-size: 12px; color: #8e95bf;">Paso:</span>
     <button class="step-btn" onclick="setStep(1, this)">1</button>
     <button class="step-btn act" onclick="setStep(2, this)">2</button>
     <button class="step-btn" onclick="setStep(5, this)">5</button>
     <button class="step-btn" onclick="setStep(10, this)">10</button>
+    <button class="step-btn" onclick="setStep(20, this)">20</button>
   </div>
 
-  <!-- Live coordinates display -->
+  <!-- Coordenadas en Vivo -->
   <div class="coords-box" id="coordsDisplay">
-    V1 (BR): X=30, Y=30<br>
-    V2 (BL): X=225, Y=30<br>
-    V3 (TL): X=225, Y=225<br>
-    V4 (TR): X=30, Y=225
+    <div id="cRow0" class="c-row act">V1 (Abajo-Der): X=30, Y=30</div>
+    <div id="cRow1" class="c-row">V2 (Abajo-Izq): X=225, Y=30</div>
+    <div id="cRow2" class="c-row">V3 (Arriba-Izq): X=225, Y=225</div>
+    <div id="cRow3" class="c-row">V4 (Arriba-Der): X=30, Y=225</div>
   </div>
 
-  <button class="save-btn" id="btnSave" onclick="saveCalib()"> Guardar calibracion</button>
-  <div id="saveToast" class="save-toast" style="display:none;"> Calibracion guardada en memoria flash </div>
-  <button class="reset-btn" onclick="resetCalib()"> Regresar a calibracion original</button>
+  <button class="save-btn" id="btnSave" onclick="saveCalib()">💾 Guardar calibración</button>
+  <div id="saveToast" class="save-toast" style="display:none;">✓ Calibración guardada en memoria flash</div>
+  <button class="reset-btn" onclick="resetCalib()">↺ Regresar a calibración original</button>
 </div>
 
 <!-- Brightness Slider -->
@@ -216,7 +358,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   <div class="val" id="sVal">860 &micro;s</div>
 </div>
 
-<!-- Color Selection (No Black) -->
+<!-- Color Selection -->
 <div class="panel">
   <h2>Laser Color</h2>
   <div class="colors">
@@ -245,13 +387,12 @@ function connect() {
     if (p[0]=='C') { setCUI(p[1]); }
     if (p[0]=='P') { setPUI(p[1]); }
     if (p[0]=='M') { setModeUI(p[1]); }
-    if (p[0]=='V') { setVertexUI(p[1]); }
+    if (p[0]=='V') { setVertexUI(parseInt(p[1])); }
     if (p[0]=='CAL') {
-      byId('coordsDisplay').innerHTML = 
-        'V1 (BR): X=' + p[1] + ', Y=' + p[2] + '<br>' +
-        'V2 (BL): X=' + p[3] + ', Y=' + p[4] + '<br>' +
-        'V3 (TL): X=' + p[5] + ', Y=' + p[6] + '<br>' +
-        'V4 (TR): X=' + p[7] + ', Y=' + p[8];
+      byId('cRow0').textContent = 'V1 (Abajo-Der): X=' + p[1] + ', Y=' + p[2];
+      byId('cRow1').textContent = 'V2 (Abajo-Izq): X=' + p[3] + ', Y=' + p[4];
+      byId('cRow2').textContent = 'V3 (Arriba-Izq): X=' + p[5] + ', Y=' + p[6];
+      byId('cRow3').textContent = 'V4 (Arriba-Der): X=' + p[7] + ', Y=' + p[8];
     }
     if (p[0]=='SAVED') {
       var t = byId('saveToast');
@@ -276,8 +417,21 @@ function setModeUI(m) {
 function setMode(m) { send('M:' + m); setModeUI(m); }
 
 function setVertexUI(v) {
-  for (var i = 0; i < 4; i++) {
-    byId('vb' + i).classList.toggle('act', i == v);
+  for (var i = 0; i <= 4; i++) {
+    var el = byId('vb' + i);
+    if (el) el.classList.toggle('act', i == v);
+  }
+  for (var j = 0; j < 4; j++) {
+    var row = byId('cRow' + j);
+    if (row) row.classList.toggle('act', j == v);
+  }
+  var ind = byId('targetIndicator');
+  if (ind) {
+    if (v == 0) ind.innerHTML = 'Ajustando: <strong>Esquina 1 (Abajo-Derecha)</strong>';
+    else if (v == 1) ind.innerHTML = 'Ajustando: <strong>Esquina 2 (Abajo-Izquierda)</strong>';
+    else if (v == 2) ind.innerHTML = 'Ajustando: <strong>Esquina 3 (Arriba-Izquierda)</strong>';
+    else if (v == 3) ind.innerHTML = 'Ajustando: <strong>Esquina 4 (Arriba-Derecha)</strong>';
+    else if (v == 4) ind.innerHTML = 'Ajustando: <strong>Posición de Todo el Cuadro</strong>';
   }
 }
 function setVertex(v) { send('V:' + v); setVertexUI(v); }
@@ -318,13 +472,40 @@ void broadcastCalibration() {
     ws.broadcastTXT(msg);
 }
 
-// Nudge selected vertex and keep loop closed
+// ============================================
+//  Nudge selected vertex or entire frame
+// ============================================
 void nudgeVertex(int dx, int dy) {
-    int nx = Calib_CoordsX[selected_vertex] + dx;
-    int ny = Calib_CoordsY[selected_vertex] + dy;
-    Calib_CoordsX[selected_vertex] = constrain(nx, 0, 255);
-    Calib_CoordsY[selected_vertex] = constrain(ny, 0, 255);
-    if (selected_vertex == 0) {
+    if (selected_vertex >= 0 && selected_vertex < 4) {
+        // Mover esquina individual
+        int nx = Calib_CoordsX[selected_vertex] + dx;
+        int ny = Calib_CoordsY[selected_vertex] + dy;
+        Calib_CoordsX[selected_vertex] = constrain(nx, 0, 255);
+        Calib_CoordsY[selected_vertex] = constrain(ny, 0, 255);
+        if (selected_vertex == 0) {
+            Calib_CoordsX[4] = Calib_CoordsX[0];
+            Calib_CoordsY[4] = Calib_CoordsY[0];
+        }
+    } else if (selected_vertex == 4) {
+        // Mover la posición de todo el cuadro de calibración completo
+        int minX = 255, maxX = 0, minY = 255, maxY = 0;
+        for (int i = 0; i < 4; i++) {
+            if (Calib_CoordsX[i] < minX) minX = Calib_CoordsX[i];
+            if (Calib_CoordsX[i] > maxX) maxX = Calib_CoordsX[i];
+            if (Calib_CoordsY[i] < minY) minY = Calib_CoordsY[i];
+            if (Calib_CoordsY[i] > maxY) maxY = Calib_CoordsY[i];
+        }
+
+        // Limitar desplazamiento dentro del rango 0-255 sin deformar
+        if (minX + dx < 0) dx = -minX;
+        if (maxX + dx > 255) dx = 255 - maxX;
+        if (minY + dy < 0) dy = -minY;
+        if (maxY + dy > 255) dy = 255 - maxY;
+
+        for (int i = 0; i < 4; i++) {
+            Calib_CoordsX[i] += dx;
+            Calib_CoordsY[i] += dy;
+        }
         Calib_CoordsX[4] = Calib_CoordsX[0];
         Calib_CoordsY[4] = Calib_CoordsY[0];
     }
@@ -387,8 +568,12 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                 Serial.println("Mode: " + String(current_mode ? "Calibration" : "Shape"));
             }
             else if (cmd == "V") {
-                selected_vertex = constrain(msg.substring(colonIdx + 1).toInt(), 0, 3);
-                Serial.println("Selected Vertex: " + String(selected_vertex + 1));
+                selected_vertex = constrain(msg.substring(colonIdx + 1).toInt(), 0, 4);
+                if (selected_vertex == 4) {
+                    Serial.println("Selected: ENTIRE CALIBRATION FRAME");
+                } else {
+                    Serial.println("Selected Vertex: " + String(selected_vertex + 1));
+                }
             }
             else if (cmd == "N") {
                 // Format: N:dx:dy
@@ -397,9 +582,13 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                     int dx = msg.substring(colonIdx + 1, secondColon).toInt();
                     int dy = msg.substring(secondColon + 1).toInt();
                     nudgeVertex(dx, dy);
-                    Serial.println("V" + String(selected_vertex + 1) + " nudged -> (" + 
-                                   String(Calib_CoordsX[selected_vertex]) + ", " + 
-                                   String(Calib_CoordsY[selected_vertex]) + ")");
+                    if (selected_vertex == 4) {
+                        Serial.printf("Entire Frame moved -> dx=%d, dy=%d\n", dx, dy);
+                    } else {
+                        Serial.println("V" + String(selected_vertex + 1) + " nudged -> (" + 
+                                       String(Calib_CoordsX[selected_vertex]) + ", " + 
+                                       String(Calib_CoordsY[selected_vertex]) + ")");
+                    }
                 }
             }
             else if (cmd == "R") {

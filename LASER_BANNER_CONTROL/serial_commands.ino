@@ -45,23 +45,45 @@ void read_serial_key() {
             Serial.println("Selected: Vertex 4 [Top-Right] -> (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
             broadcastCalibration();
         }
+        else if (cmd == '5' || cmd == '0') {
+            selected_vertex = 4;
+            current_mode = 1;
+            Serial.println("Selected: ENTIRE CALIBRATION FRAME (Move All 4 Corners)");
+            broadcastCalibration();
+        }
 
         // Nudge controls: W (Up), S (Down), A (Left), D (Right)
         else if (cmd == 'w' || cmd == 'W') {
             nudgeVertex(0, move_step);
-            Serial.println("V" + String(selected_vertex + 1) + " UP -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            if (selected_vertex == 4) {
+                Serial.println("ENTIRE FRAME UP -> dy=+" + String(move_step));
+            } else {
+                Serial.println("V" + String(selected_vertex + 1) + " UP -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            }
         }
         else if (cmd == 's' || cmd == 'S') {
             nudgeVertex(0, -move_step);
-            Serial.println("V" + String(selected_vertex + 1) + " DOWN -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            if (selected_vertex == 4) {
+                Serial.println("ENTIRE FRAME DOWN -> dy=-" + String(move_step));
+            } else {
+                Serial.println("V" + String(selected_vertex + 1) + " DOWN -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            }
         }
         else if (cmd == 'a' || cmd == 'A') {
             nudgeVertex(move_step, 0); // On this projector, increasing X moves physically LEFT on wall
-            Serial.println("V" + String(selected_vertex + 1) + " LEFT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            if (selected_vertex == 4) {
+                Serial.println("ENTIRE FRAME LEFT -> dx=+" + String(move_step));
+            } else {
+                Serial.println("V" + String(selected_vertex + 1) + " LEFT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            }
         }
         else if (cmd == 'd' || cmd == 'D') {
             nudgeVertex(-move_step, 0); // Decreasing X moves physically RIGHT on wall
-            Serial.println("V" + String(selected_vertex + 1) + " RIGHT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            if (selected_vertex == 4) {
+                Serial.println("ENTIRE FRAME RIGHT -> dx=-" + String(move_step));
+            } else {
+                Serial.println("V" + String(selected_vertex + 1) + " RIGHT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+            }
         }
 
         // Print Coordinates: P

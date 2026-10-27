@@ -37,7 +37,7 @@ int brake = 860;            // microseconds per point
 int color_pointer = 1;      // active color (1-7)
 int laser_power = 1;        // 1 = ON, 0 = OFF
 int current_mode = 1;       // 0 = Normal Shape, 1 = Calibration Square
-int selected_vertex = 0;    // 0=BL, 1=BR, 2=TR, 3=TL
+int selected_vertex = 2;    // Esquina 1=TL (2), Esquina 2=TR (3), Esquina 3=BR (0), Esquina 4=BL (1)
 int move_step = 2;          // points per nudge step
 
 // --- WiFi AP Settings ---

@@ -20,29 +20,29 @@ void read_serial_key() {
     while (Serial.available() > 0) {
         char cmd = Serial.read();
 
-        // Corner Selection: 1, 2, 3, 4
+        // Corner Selection: 1=TL, 2=TR, 3=BR, 4=BL, 5=All
         if (cmd == '1') {
-            selected_vertex = 0;
-            current_mode = 1; // switch to calibration mode
-            Serial.println("Selected: Vertex 1 [Bottom-Right] -> (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
+            selected_vertex = 2; // Arriba-Izquierda (TL)
+            current_mode = 1;    // switch to calibration mode
+            Serial.println("Selected: Esquina 1 [Arriba-Izquierda / TL] -> (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '2') {
-            selected_vertex = 1;
+            selected_vertex = 3; // Arriba-Derecha (TR)
             current_mode = 1;
-            Serial.println("Selected: Vertex 2 [Bottom-Left] -> (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
+            Serial.println("Selected: Esquina 2 [Arriba-Derecha / TR] -> (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '3') {
-            selected_vertex = 2;
+            selected_vertex = 0; // Abajo-Derecha (BR)
             current_mode = 1;
-            Serial.println("Selected: Vertex 3 [Top-Left] -> (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
+            Serial.println("Selected: Esquina 3 [Abajo-Derecha / BR] -> (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '4') {
-            selected_vertex = 3;
+            selected_vertex = 1; // Abajo-Izquierda (BL)
             current_mode = 1;
-            Serial.println("Selected: Vertex 4 [Top-Right] -> (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
+            Serial.println("Selected: Esquina 4 [Abajo-Izquierda / BL] -> (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
             broadcastCalibration();
         }
         else if (cmd == '5' || cmd == '0') {
@@ -58,7 +58,8 @@ void read_serial_key() {
             if (selected_vertex == 4) {
                 Serial.println("ENTIRE FRAME UP -> dy=+" + String(move_step));
             } else {
-                Serial.println("V" + String(selected_vertex + 1) + " UP -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+                String lbl = (selected_vertex == 2) ? "1 [TL]" : (selected_vertex == 3) ? "2 [TR]" : (selected_vertex == 0) ? "3 [BR]" : "4 [BL]";
+                Serial.println("Esquina " + lbl + " UP -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
             }
         }
         else if (cmd == 's' || cmd == 'S') {
@@ -66,7 +67,8 @@ void read_serial_key() {
             if (selected_vertex == 4) {
                 Serial.println("ENTIRE FRAME DOWN -> dy=-" + String(move_step));
             } else {
-                Serial.println("V" + String(selected_vertex + 1) + " DOWN -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+                String lbl = (selected_vertex == 2) ? "1 [TL]" : (selected_vertex == 3) ? "2 [TR]" : (selected_vertex == 0) ? "3 [BR]" : "4 [BL]";
+                Serial.println("Esquina " + lbl + " DOWN -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
             }
         }
         else if (cmd == 'a' || cmd == 'A') {
@@ -74,7 +76,8 @@ void read_serial_key() {
             if (selected_vertex == 4) {
                 Serial.println("ENTIRE FRAME LEFT -> dx=+" + String(move_step));
             } else {
-                Serial.println("V" + String(selected_vertex + 1) + " LEFT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+                String lbl = (selected_vertex == 2) ? "1 [TL]" : (selected_vertex == 3) ? "2 [TR]" : (selected_vertex == 0) ? "3 [BR]" : "4 [BL]";
+                Serial.println("Esquina " + lbl + " LEFT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
             }
         }
         else if (cmd == 'd' || cmd == 'D') {
@@ -82,12 +85,20 @@ void read_serial_key() {
             if (selected_vertex == 4) {
                 Serial.println("ENTIRE FRAME RIGHT -> dx=-" + String(move_step));
             } else {
-                Serial.println("V" + String(selected_vertex + 1) + " RIGHT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
+                String lbl = (selected_vertex == 2) ? "1 [TL]" : (selected_vertex == 3) ? "2 [TR]" : (selected_vertex == 0) ? "3 [BR]" : "4 [BL]";
+                Serial.println("Esquina " + lbl + " RIGHT -> (" + String(Calib_CoordsX[selected_vertex]) + ", " + String(Calib_CoordsY[selected_vertex]) + ")");
             }
         }
 
         // Print Coordinates: P
         else if (cmd == 'p' || cmd == 'P') {
+            Serial.println("\n--- Current Corner Coordinates ---");
+            Serial.println("1 [Arriba-Izquierda / TL]: (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
+            Serial.println("2 [Arriba-Derecha / TR]  : (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
+            Serial.println("3 [Abajo-Derecha / BR]   : (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
+            Serial.println("4 [Abajo-Izquierda / BL] : (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
+            Serial.println("----------------------------------\n");
+        }
             Serial.println("\n--- Current Vertex Coordinates ---");
             Serial.println("V1 (Bottom-Right): (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
             Serial.println("V2 (Bottom-Left) : (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");

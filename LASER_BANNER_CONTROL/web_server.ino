@@ -85,7 +85,9 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
   .cbtn.act { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.5); }
 
   /* ========================================================
-     CUADRO VISUAL DE CALIBRACION CON ESQUINAS 1, 2, 3, 4
+     CUADRO VISUAL DE CALIBRACION
+     1 = Arriba-Izquierda, 2 = Arriba-Derecha
+     4 = Abajo-Izquierda,  3 = Abajo-Derecha
      ======================================================== */
   .calib-box-wrap {
     position: relative;
@@ -116,7 +118,7 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     background: #161a35;
     border: 3px solid #4a548c;
     color: #fff;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 800;
     display: flex;
     flex-direction: column;
@@ -146,11 +148,16 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     color: #9effc7;
   }
 
-  /* Posiciones de las 4 esquinas */
-  .c-tl { top: 4px; left: 4px; }       /* Esquina 3: Arriba-Izquierda */
-  .c-tr { top: 4px; right: 4px; }      /* Esquina 4: Arriba-Derecha */
-  .c-bl { bottom: 4px; left: 4px; }    /* Esquina 2: Abajo-Izquierda */
-  .c-br { bottom: 4px; right: 4px; }   /* Esquina 1: Abajo-Derecha */
+  /* Posiciones de las 4 esquinas solicitadas:
+     1: Arriba-Izquierda (TL)
+     2: Arriba-Derecha   (TR)
+     4: Abajo-Izquierda  (BL)
+     3: Abajo-Derecha    (BR)
+  */
+  .c-tl { top: 4px; left: 4px; }       /* 1: Arriba-Izquierda */
+  .c-tr { top: 4px; right: 4px; }      /* 2: Arriba-Derecha */
+  .c-bl { bottom: 4px; left: 4px; }    /* 4: Abajo-Izquierda */
+  .c-br { bottom: 4px; right: 4px; }   /* 3: Abajo-Derecha */
 
   /* Botón central: Mover todo el cuadro completo */
   .center-node {
@@ -272,43 +279,45 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <div class="panel" id="calibPanel">
   <h2>Calibración de Cuadro y Esquinas</h2>
   
-  <!-- Cuadro Visual con esquinas 1, 2, 3, 4 -->
+  <!-- Cuadro Visual con esquinas:
+       1 = Arriba-Izquierda, 2 = Arriba-Derecha
+       4 = Abajo-Izquierda,  3 = Abajo-Derecha -->
   <div class="calib-box-wrap">
     <div class="calib-inner-border"></div>
 
-    <!-- Esquina 3: Arriba-Izquierda (TL) -->
-    <button class="corner-node c-tl" id="vb2" onclick="setVertex(2)" title="Esquina 3">
-      3
+    <!-- Esquina 1: Arriba-Izquierda (TL -> index 2) -->
+    <button class="corner-node c-tl act" id="vb2" onclick="setVertex(2)" title="1: Arriba-Izquierda">
+      1
       <span class="corner-lbl">TL</span>
     </button>
 
-    <!-- Esquina 4: Arriba-Derecha (TR) -->
-    <button class="corner-node c-tr" id="vb3" onclick="setVertex(3)" title="Esquina 4">
-      4
+    <!-- Esquina 2: Arriba-Derecha (TR -> index 3) -->
+    <button class="corner-node c-tr" id="vb3" onclick="setVertex(3)" title="2: Arriba-Derecha">
+      2
       <span class="corner-lbl">TR</span>
     </button>
 
-    <!-- Centro: Mover el Cuadro Completo -->
+    <!-- Centro: Mover el Cuadro Completo (index 4) -->
     <button class="center-node" id="vb4" onclick="setVertex(4)" title="Mover todo el cuadro">
       &#10021; MOVER TODO
     </button>
 
-    <!-- Esquina 2: Abajo-Izquierda (BL) -->
-    <button class="corner-node c-bl" id="vb1" onclick="setVertex(1)" title="Esquina 2">
-      2
+    <!-- Esquina 4: Abajo-Izquierda (BL -> index 1) -->
+    <button class="corner-node c-bl" id="vb1" onclick="setVertex(1)" title="4: Abajo-Izquierda">
+      4
       <span class="corner-lbl">BL</span>
     </button>
 
-    <!-- Esquina 1: Abajo-Derecha (BR) -->
-    <button class="corner-node c-br act" id="vb0" onclick="setVertex(0)" title="Esquina 1">
-      1
+    <!-- Esquina 3: Abajo-Derecha (BR -> index 0) -->
+    <button class="corner-node c-br" id="vb0" onclick="setVertex(0)" title="3: Abajo-Derecha">
+      3
       <span class="corner-lbl">BR</span>
     </button>
   </div>
 
   <!-- Indicador de elemento seleccionado -->
   <div class="target-indicator" id="targetIndicator">
-    Ajustando: <strong>Esquina 1 (Abajo-Derecha)</strong>
+    Ajustando: <strong>Esquina 1 (Arriba-Izquierda)</strong>
   </div>
 
   <!-- Controles Direccionales D-Pad -->
@@ -329,12 +338,12 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <button class="step-btn" onclick="setStep(20, this)">20</button>
   </div>
 
-  <!-- Coordenadas en Vivo -->
+  <!-- Coordenadas en Vivo ordenadas 1, 2, 3, 4 -->
   <div class="coords-box" id="coordsDisplay">
-    <div id="cRow0" class="c-row act">V1 (Abajo-Der): X=30, Y=30</div>
-    <div id="cRow1" class="c-row">V2 (Abajo-Izq): X=225, Y=30</div>
-    <div id="cRow2" class="c-row">V3 (Arriba-Izq): X=225, Y=225</div>
-    <div id="cRow3" class="c-row">V4 (Arriba-Der): X=30, Y=225</div>
+    <div id="cRow2" class="c-row act">1 (Arriba-Izq): X=225, Y=225</div>
+    <div id="cRow3" class="c-row">2 (Arriba-Der): X=30, Y=225</div>
+    <div id="cRow0" class="c-row">3 (Abajo-Der): X=30, Y=30</div>
+    <div id="cRow1" class="c-row">4 (Abajo-Izq): X=225, Y=30</div>
   </div>
 
   <button class="save-btn" id="btnSave" onclick="saveCalib()">💾 Guardar calibración</button>
@@ -389,10 +398,14 @@ function connect() {
     if (p[0]=='M') { setModeUI(p[1]); }
     if (p[0]=='V') { setVertexUI(parseInt(p[1])); }
     if (p[0]=='CAL') {
-      byId('cRow0').textContent = 'V1 (Abajo-Der): X=' + p[1] + ', Y=' + p[2];
-      byId('cRow1').textContent = 'V2 (Abajo-Izq): X=' + p[3] + ', Y=' + p[4];
-      byId('cRow2').textContent = 'V3 (Arriba-Izq): X=' + p[5] + ', Y=' + p[6];
-      byId('cRow3').textContent = 'V4 (Arriba-Der): X=' + p[7] + ', Y=' + p[8];
+      // p[1], p[2] = BR (3)
+      // p[3], p[4] = BL (4)
+      // p[5], p[6] = TL (1)
+      // p[7], p[8] = TR (2)
+      byId('cRow2').textContent = '1 (Arriba-Izq): X=' + p[5] + ', Y=' + p[6];
+      byId('cRow3').textContent = '2 (Arriba-Der): X=' + p[7] + ', Y=' + p[8];
+      byId('cRow0').textContent = '3 (Abajo-Der): X=' + p[1] + ', Y=' + p[2];
+      byId('cRow1').textContent = '4 (Abajo-Izq): X=' + p[3] + ', Y=' + p[4];
     }
     if (p[0]=='SAVED') {
       var t = byId('saveToast');
@@ -427,10 +440,10 @@ function setVertexUI(v) {
   }
   var ind = byId('targetIndicator');
   if (ind) {
-    if (v == 0) ind.innerHTML = 'Ajustando: <strong>Esquina 1 (Abajo-Derecha)</strong>';
-    else if (v == 1) ind.innerHTML = 'Ajustando: <strong>Esquina 2 (Abajo-Izquierda)</strong>';
-    else if (v == 2) ind.innerHTML = 'Ajustando: <strong>Esquina 3 (Arriba-Izquierda)</strong>';
-    else if (v == 3) ind.innerHTML = 'Ajustando: <strong>Esquina 4 (Arriba-Derecha)</strong>';
+    if (v == 2) ind.innerHTML = 'Ajustando: <strong>Esquina 1 (Arriba-Izquierda)</strong>';
+    else if (v == 3) ind.innerHTML = 'Ajustando: <strong>Esquina 2 (Arriba-Derecha)</strong>';
+    else if (v == 0) ind.innerHTML = 'Ajustando: <strong>Esquina 3 (Abajo-Derecha)</strong>';
+    else if (v == 1) ind.innerHTML = 'Ajustando: <strong>Esquina 4 (Abajo-Izquierda)</strong>';
     else if (v == 4) ind.innerHTML = 'Ajustando: <strong>Posición de Todo el Cuadro</strong>';
   }
 }
@@ -571,8 +584,14 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                 selected_vertex = constrain(msg.substring(colonIdx + 1).toInt(), 0, 4);
                 if (selected_vertex == 4) {
                     Serial.println("Selected: ENTIRE CALIBRATION FRAME");
-                } else {
-                    Serial.println("Selected Vertex: " + String(selected_vertex + 1));
+                } else if (selected_vertex == 2) {
+                    Serial.println("Selected: Esquina 1 [Arriba-Izquierda / TL]");
+                } else if (selected_vertex == 3) {
+                    Serial.println("Selected: Esquina 2 [Arriba-Derecha / TR]");
+                } else if (selected_vertex == 0) {
+                    Serial.println("Selected: Esquina 3 [Abajo-Derecha / BR]");
+                } else if (selected_vertex == 1) {
+                    Serial.println("Selected: Esquina 4 [Abajo-Izquierda / BL]");
                 }
             }
             else if (cmd == "N") {
@@ -585,7 +604,12 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                     if (selected_vertex == 4) {
                         Serial.printf("Entire Frame moved -> dx=%d, dy=%d\n", dx, dy);
                     } else {
-                        Serial.println("V" + String(selected_vertex + 1) + " nudged -> (" + 
+                        String lbl = "";
+                        if (selected_vertex == 2) lbl = "Esquina 1 [TL]";
+                        else if (selected_vertex == 3) lbl = "Esquina 2 [TR]";
+                        else if (selected_vertex == 0) lbl = "Esquina 3 [BR]";
+                        else if (selected_vertex == 1) lbl = "Esquina 4 [BL]";
+                        Serial.println(lbl + " nudged -> (" + 
                                        String(Calib_CoordsX[selected_vertex]) + ", " + 
                                        String(Calib_CoordsY[selected_vertex]) + ")");
                     }
@@ -593,11 +617,11 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
             }
             else if (cmd == "R") {
                 // Reset calibration corners to default
-                Calib_CoordsX[0] = 30;  Calib_CoordsY[0] = 30;
-                Calib_CoordsX[1] = 225; Calib_CoordsY[1] = 30;
-                Calib_CoordsX[2] = 225; Calib_CoordsY[2] = 225;
-                Calib_CoordsX[3] = 30;  Calib_CoordsY[3] = 225;
-                Calib_CoordsX[4] = 30;  Calib_CoordsY[4] = 30;
+                Calib_CoordsX[0] = 30;  Calib_CoordsY[0] = 30;   // BR (3)
+                Calib_CoordsX[1] = 225; Calib_CoordsY[1] = 30;   // BL (4)
+                Calib_CoordsX[2] = 225; Calib_CoordsY[2] = 225;  // TL (1)
+                Calib_CoordsX[3] = 30;  Calib_CoordsY[3] = 225;  // TR (2)
+                Calib_CoordsX[4] = 30;  Calib_CoordsY[4] = 30;   // Loop closure
                 broadcastCalibration();
                 Serial.println("Esquinas de regreso a calibracion inicial");
             }

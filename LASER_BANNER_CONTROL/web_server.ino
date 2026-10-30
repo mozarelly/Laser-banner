@@ -340,10 +340,10 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
 
   <!-- Coordenadas en Vivo ordenadas 1, 2, 3, 4 -->
   <div class="coords-box" id="coordsDisplay">
-    <div id="cRow2" class="c-row act">1 (Arriba-Izq): X=225, Y=225</div>
-    <div id="cRow3" class="c-row">2 (Arriba-Der): X=30, Y=225</div>
-    <div id="cRow0" class="c-row">3 (Abajo-Der): X=30, Y=30</div>
-    <div id="cRow1" class="c-row">4 (Abajo-Izq): X=225, Y=30</div>
+    <div id="cRow2" class="c-row act">1 (Arriba-Izq): X=255, Y=255</div>
+    <div id="cRow3" class="c-row">2 (Arriba-Der): X=0, Y=255</div>
+    <div id="cRow0" class="c-row">3 (Abajo-Der): X=0, Y=0</div>
+    <div id="cRow1" class="c-row">4 (Abajo-Izq): X=255, Y=0</div>
   </div>
 
   <button class="save-btn" id="btnSave" onclick="saveCalib()">💾 Guardar calibración</button>
@@ -616,14 +616,14 @@ void onWebSocketEvent(uint8_t clientNum, WStype_t type, uint8_t *payload, size_t
                 }
             }
             else if (cmd == "R") {
-                // Reset calibration corners to default
-                Calib_CoordsX[0] = 30;  Calib_CoordsY[0] = 30;   // BR (3)
-                Calib_CoordsX[1] = 225; Calib_CoordsY[1] = 30;   // BL (4)
-                Calib_CoordsX[2] = 225; Calib_CoordsY[2] = 225;  // TL (1)
-                Calib_CoordsX[3] = 30;  Calib_CoordsY[3] = 225;  // TR (2)
-                Calib_CoordsX[4] = 30;  Calib_CoordsY[4] = 30;   // Loop closure
+                // Reset calibration corners to default (0 to 255)
+                Calib_CoordsX[0] = 0;   Calib_CoordsY[0] = 0;    // BR (3)
+                Calib_CoordsX[1] = 255; Calib_CoordsY[1] = 0;    // BL (4)
+                Calib_CoordsX[2] = 255; Calib_CoordsY[2] = 255;  // TL (1)
+                Calib_CoordsX[3] = 0;   Calib_CoordsY[3] = 255;  // TR (2)
+                Calib_CoordsX[4] = 0;   Calib_CoordsY[4] = 0;    // Loop closure
                 broadcastCalibration();
-                Serial.println("Esquinas de regreso a calibracion inicial");
+                Serial.println("Esquinas de regreso a calibracion inicial (0-255)");
             }
             else if (cmd == "SAVE") {
                 saveCalibrationToNVS();

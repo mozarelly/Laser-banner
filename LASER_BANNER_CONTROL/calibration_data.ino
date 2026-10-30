@@ -6,11 +6,11 @@
 const int CALIB_SAMPLES = 5;
 
 uint8_t Calib_CoordsX[CALIB_SAMPLES] = {
-    30, 225, 225, 30, 30
+    0, 255, 255, 0, 0
 };
 
 uint8_t Calib_CoordsY[CALIB_SAMPLES] = {
-    30, 30, 225, 225, 30
+    0, 0, 255, 255, 0
 };
 
 uint8_t Calib_Colors[CALIB_SAMPLES] = {

@@ -62,19 +62,19 @@ extern const uint8_t PROGMEM Shape_Colors[];
 void loadCalibrationFromNVS() {
     prefs.begin("laser_cal", true); // Read-only mode
     if (prefs.isKey("c0x")) {
-        Calib_CoordsX[0] = prefs.getUChar("c0x", 30);
-        Calib_CoordsY[0] = prefs.getUChar("c0y", 30);
-        Calib_CoordsX[1] = prefs.getUChar("c1x", 225);
-        Calib_CoordsY[1] = prefs.getUChar("c1y", 30);
-        Calib_CoordsX[2] = prefs.getUChar("c2x", 225);
-        Calib_CoordsY[2] = prefs.getUChar("c2y", 225);
-        Calib_CoordsX[3] = prefs.getUChar("c3x", 30);
-        Calib_CoordsY[3] = prefs.getUChar("c3y", 225);
+        Calib_CoordsX[0] = prefs.getUChar("c0x", 0);
+        Calib_CoordsY[0] = prefs.getUChar("c0y", 0);
+        Calib_CoordsX[1] = prefs.getUChar("c1x", 255);
+        Calib_CoordsY[1] = prefs.getUChar("c1y", 0);
+        Calib_CoordsX[2] = prefs.getUChar("c2x", 255);
+        Calib_CoordsY[2] = prefs.getUChar("c2y", 255);
+        Calib_CoordsX[3] = prefs.getUChar("c3x", 0);
+        Calib_CoordsY[3] = prefs.getUChar("c3y", 255);
         Calib_CoordsX[4] = Calib_CoordsX[0];
         Calib_CoordsY[4] = Calib_CoordsY[0];
         Serial.println("Loaded 4-corner calibration from Flash (NVS)!");
     } else {
-        Serial.println("No saved calibration found in Flash. Using default corners.");
+        Serial.println("No saved calibration found in Flash. Using default corners (0-255).");
     }
     prefs.end();
 }

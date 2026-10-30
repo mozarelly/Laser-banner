@@ -99,13 +99,6 @@ void read_serial_key() {
             Serial.println("4 [Abajo-Izquierda / BL] : (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
             Serial.println("----------------------------------\n");
         }
-            Serial.println("\n--- Current Vertex Coordinates ---");
-            Serial.println("V1 (Bottom-Right): (" + String(Calib_CoordsX[0]) + ", " + String(Calib_CoordsY[0]) + ")");
-            Serial.println("V2 (Bottom-Left) : (" + String(Calib_CoordsX[1]) + ", " + String(Calib_CoordsY[1]) + ")");
-            Serial.println("V3 (Top-Left)    : (" + String(Calib_CoordsX[2]) + ", " + String(Calib_CoordsY[2]) + ")");
-            Serial.println("V4 (Top-Right)   : (" + String(Calib_CoordsX[3]) + ", " + String(Calib_CoordsY[3]) + ")");
-            Serial.println("----------------------------------\n");
-        }
 
         // Save Calibration: K
         else if (cmd == 'k' || cmd == 'K') {
